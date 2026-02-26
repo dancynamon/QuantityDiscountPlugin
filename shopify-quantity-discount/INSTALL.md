@@ -1,168 +1,124 @@
-# Shopify Quantity Discount Plugin — Installation Guide
+# Shopify Quantity Discount Plugin
 
-A drop-in quantity discount plugin for Shopify themes. Displays tiered pricing on product pages so customers can see how much they save when buying in bulk. Fully configurable from the Shopify theme editor — no code changes needed after install.
-
----
-
-## Features
-
-- **Tiered quantity discounts** — percentage off, fixed amount off, or fixed price per item
-- **Three display styles** — Cards, Table, or Quick-select Pills
-- **Theme editor integration** — configure tiers, colors, and labels from Customize without touching code
-- **Live price updates** — price display and savings update as the customer changes quantity
-- **Smart nudging** — "Add 3 more to unlock 10% off" messaging
-- **Cart integration** — attaches discount metadata as line item properties
-- **Variant-aware** — recalculates when the customer switches product variants
-- **Responsive** — looks great on desktop and mobile
-- **Lightweight** — ~6 KB JS + ~3 KB CSS, no dependencies
+A single-file quantity discount plugin for Shopify. Upload one file, add the section from the theme editor — done.
 
 ---
 
-## Installation
+## Installation (2 steps)
 
-### Step 1: Upload Assets
+### Step 1: Upload the file
 
-1. In your Shopify admin, go to **Online Store > Themes**
-2. Click **Actions > Edit code** on your active theme
-3. Upload the following files:
+1. In your Shopify admin go to **Online Store > Themes**
+2. Click **... > Edit code** on your active theme
+3. In the **Sections** folder, click **Add a new section**
+4. Name it `quantity-discounts` and replace the entire contents with the code from `quantity-discounts.liquid`
+5. Click **Save**
 
-| File | Upload to |
-|---|---|
-| `assets/quantity-discount.js` | **Assets** folder |
-| `assets/quantity-discount.css` | **Assets** folder |
-| `sections/quantity-discount-settings.liquid` | **Sections** folder |
-| `snippets/quantity-discount.liquid` | **Snippets** folder |
-
-### Step 2: Add to Your Product Template
-
-Open your **product template** file. The exact file depends on your theme:
-
-- **Dawn / Online Store 2.0 themes**: `sections/main-product.liquid`
-- **Debut / older themes**: `templates/product.liquid`
-- **Sectioned themes**: Look for your product section file
-
-Add this line where you want the discount tiers to appear (typically above or below the quantity selector / add-to-cart button):
-
-```liquid
-{% render 'quantity-discount' %}
-```
-
-### Step 3: Configure Discount Tiers
+### Step 2: Add to your product page
 
 1. Go to **Online Store > Themes > Customize**
-2. Navigate to a **Product page**
-3. Find the **Quantity Discounts** section in the left sidebar
-4. Configure your settings:
+2. Navigate to a **Product page** using the page selector at the top
+3. Click **Add section** in the left sidebar
+4. Select **Quantity Discounts**
+5. Drag it to where you want it (above or below the buy button works great)
+6. Click **Save**
 
-| Setting | Description |
+That's it. The section comes pre-loaded with 4 discount tiers (5%, 10%, 15%, 20% off) that you can customize.
+
+---
+
+## Configuration
+
+Everything is controlled from the theme editor — no code changes needed.
+
+### Section settings
+
+| Setting | What it does |
 |---|---|
-| **Enable quantity discounts** | Turn the feature on/off globally |
-| **Section title** | Heading shown above the tiers (e.g., "Buy More, Save More") |
+| **Enable** | Toggle the entire feature on/off |
+| **Title** | Heading text (default: "Buy More, Save More") |
+| **Subtitle** | Description text below the title |
 | **Discount type** | Percentage off, fixed amount off, or fixed price per item |
 | **Display style** | Cards, Table, or Quick-select Pills |
-| **Accent color** | Matches your brand color |
-| **Show savings** | Display per-item and total savings |
-| **Highlight best value** | Visually emphasize the tier with the biggest discount |
+| **Accent color** | Brand color for highlights, badges, and active states |
+| **Show savings** | Display per-item and total savings amounts |
+| **Highlight best value** | Visually emphasize the biggest discount tier |
+| **Attach discount info to cart** | Adds discount metadata as line item properties |
 
-5. Click **Add block** to create discount tiers:
+### Adding / editing tiers
 
-| Tier Setting | Description |
+Click **Add block > Discount Tier** to create a new tier. Each tier has:
+
+| Setting | What it means |
 |---|---|
-| **Minimum quantity** | The quantity at which this tier activates |
-| **Maximum quantity** | Upper limit (0 = unlimited) |
-| **Discount value** | The amount — meaning depends on Discount Type above |
-| **Tier label** | Optional custom label (e.g., "Starter Pack") |
-| **Tier badge** | Optional badge text (e.g., "POPULAR", "BEST DEAL") |
+| **Minimum quantity** | Quantity where this tier kicks in |
+| **Maximum quantity** | Upper limit (set 0 for no cap) |
+| **Discount value** | The number — meaning depends on Discount Type (e.g., 10 = 10% off) |
+| **Custom label** | Optional name like "Starter Pack" (auto-generates "2 – 4" if blank) |
+| **Badge** | Optional badge like "POPULAR" or "BEST DEAL" |
 
 ---
 
-## Example Configurations
+## Example tier setups
 
-### Percentage-Based Discounts (Most Common)
+**Percentage discounts** (most common):
 
-| Tier | Min Qty | Max Qty | Discount Value |
-|---|---|---|---|
-| 1 | 2 | 4 | 5 (= 5% off) |
-| 2 | 5 | 9 | 10 (= 10% off) |
-| 3 | 10 | 24 | 15 (= 15% off) |
-| 4 | 25 | 0 | 20 (= 20% off) |
-
-### Fixed Price Tiers (Wholesale)
-
-Set **Discount type** = "Fixed price per item"
-
-| Tier | Min Qty | Discount Value |
+| Qty Range | Discount Value | Result |
 |---|---|---|
-| 1 | 10 | 8.99 (= $8.99 each) |
-| 2 | 25 | 7.99 (= $7.99 each) |
-| 3 | 50 | 6.99 (= $6.99 each) |
+| 2 – 4 | 5 | 5% off |
+| 5 – 9 | 10 | 10% off |
+| 10 – 24 | 15 | 15% off |
+| 25+ | 20 | 20% off |
+
+**Wholesale fixed pricing** (set Discount Type = "Fixed price per item"):
+
+| Min Qty | Discount Value | Result |
+|---|---|---|
+| 10 | 8.99 | $8.99 each |
+| 25 | 7.99 | $7.99 each |
+| 50 | 6.99 | $6.99 each |
 
 ---
 
-## Applying Actual Discounts at Checkout
+## Applying discounts at checkout
 
-This plugin **displays** quantity-based pricing and attaches discount metadata to cart line items. To actually **apply** the discounted price at checkout, you need one of the following:
+This plugin **displays** tiered pricing and attaches metadata to cart items. To apply the actual discounted price at checkout, use one of these:
 
-### Option A: Shopify Automatic Discounts (Recommended)
+**Option A — Shopify Automatic Discounts (recommended, all plans):**
+Go to **Discounts > Create discount > Amount off products** and set minimum quantity requirements matching your tiers.
 
-1. Go to **Discounts** in your Shopify admin
-2. Create an **Automatic discount** > **Amount off products**
-3. Set **Minimum purchase requirements** to match your tiers
-4. This is the simplest approach and works on all Shopify plans
+**Option B — Shopify Scripts (Shopify Plus only):**
+Read the `_qty_discount_price` and `_qty_discount_value` line item properties and adjust pricing in a checkout script.
 
-### Option B: Shopify Scripts (Shopify Plus)
-
-If you're on Shopify Plus, use **Shopify Scripts** to read the line item properties (`_qty_discount_price`, `_qty_discount_value`) and apply the correct price at checkout.
-
-### Option C: Third-Party Discount Apps
-
-Several Shopify apps can read line item properties and apply dynamic pricing. The plugin stores:
-
-- `_qty_discount` — human-readable discount label (e.g., "10% off")
-- `_qty_discount_price` — the calculated unit price
+**Option C — Third-party discount apps:**
+The plugin writes these line item properties that apps can read:
+- `_qty_discount` — e.g., "10% off"
+- `_qty_discount_price` — calculated unit price
 - `_qty_discount_type` — "percentage", "fixed_amount", or "fixed_price"
-- `_qty_discount_value` — the raw discount value
+- `_qty_discount_value` — raw discount number
 
 ---
 
 ## Customization
 
-### Changing Styles
-
-Override any CSS class prefixed with `qd-` in your theme's stylesheet. Key classes:
+Override styles using any `qd-` prefixed CSS class in your theme stylesheet:
 
 ```css
-.qd-container        /* Outer wrapper */
-.qd-card             /* Individual tier card */
-.qd-card--active     /* Currently selected tier */
-.qd-card--best       /* Best-value tier */
-.qd-card-badge       /* Badge label on a card */
-.qd-live-summary     /* Price summary below tiers */
-```
-
-### JavaScript API
-
-The plugin exposes `window.QuantityDiscount` for advanced integrations:
-
-```javascript
-// The constructor is called automatically.
-// Access the instance via the container element:
-var container = document.getElementById('qd-container-...');
+.qd-container { }         /* outer wrapper */
+.qd-card { }              /* tier card */
+.qd-card--active { }      /* selected tier */
+.qd-card--best { }        /* best-value tier */
+.qd-card-badge { }        /* badge label */
+.qd-live-summary { }      /* price summary bar */
 ```
 
 ---
 
 ## Troubleshooting
 
-| Issue | Fix |
+| Problem | Fix |
 |---|---|
-| Tiers don't appear | Make sure the section is **enabled** in the theme editor and has at least one tier block added |
-| Price doesn't update live | The plugin looks for standard Shopify quantity input selectors. If your theme uses a custom quantity input, add `name="quantity"` to it |
-| Styles look off | The plugin inherits your theme's font. Override `--qd-accent` and other CSS variables for fine-tuning |
-| Discounts don't apply at checkout | See "Applying Actual Discounts at Checkout" above — this plugin handles the display; checkout pricing needs Shopify Discounts, Scripts, or an app |
-
----
-
-## Browser Support
-
-Works in all modern browsers (Chrome, Firefox, Safari, Edge). No dependencies required.
+| Section doesn't appear | Make sure **Enable** is checked and at least one tier block exists |
+| Price doesn't update when changing quantity | Your theme may use a non-standard quantity input — ensure it has `name="quantity"` |
+| Discount not applied at checkout | This is expected — see "Applying discounts at checkout" above |
+| Styles clash with my theme | Override the `qd-` CSS classes or change the accent color in settings |

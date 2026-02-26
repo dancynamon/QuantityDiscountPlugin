@@ -1,0 +1,589 @@
+{% comment %}
+  ============================================================
+  Quantity Discount Plugin — Single-File Shopify Section
+  ============================================================
+  INSTALL:
+    1. Upload this file to your theme's  sections/  folder
+    2. Go to Customize → Product page → Add section → "Quantity Discounts"
+    3. Configure tiers, colors, and style — done!
+  ============================================================
+{% endcomment %}
+
+{%- if section.settings.enabled -%}
+
+{%- comment -%} ============ INLINE CSS ============ {%- endcomment -%}
+<style>
+  .qd-container{--qd-accent:{{ section.settings.accent_color }};--qd-accent-light:{{ section.settings.accent_color }}1a;--qd-accent-medium:{{ section.settings.accent_color }}40;--qd-text:#1a1a2e;--qd-text-muted:#6b7280;--qd-bg:#fff;--qd-bg-soft:#f8f9fc;--qd-border:#e5e7eb;--qd-radius:10px;--qd-radius-sm:6px;--qd-shadow:0 1px 3px rgba(0,0,0,.08);--qd-shadow-lg:0 4px 12px rgba(0,0,0,.12);font-family:inherit;margin:16px 0;color:var(--qd-text)}
+  .qd-header{margin-bottom:14px}
+  .qd-title{font-size:1.1rem;font-weight:700;margin:0 0 4px;color:var(--qd-text)}
+  .qd-subtitle{font-size:.85rem;color:var(--qd-text-muted);margin:0}
+
+  /* Cards */
+  .qd-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+  .qd-card{position:relative;background:var(--qd-bg);border:2px solid var(--qd-border);border-radius:var(--qd-radius);padding:16px 14px 14px;text-align:center;cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .15s}
+  .qd-card:hover{border-color:var(--qd-accent);box-shadow:var(--qd-shadow);transform:translateY(-1px)}
+  .qd-card--active{border-color:var(--qd-accent);background:var(--qd-accent-light);box-shadow:var(--qd-shadow-lg)}
+  .qd-card--best{border-color:var(--qd-accent)}
+  .qd-card-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--qd-accent);color:#fff;font-size:.65rem;font-weight:700;padding:2px 10px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap}
+  .qd-card-qty{font-size:.95rem;font-weight:700;color:var(--qd-text);margin-bottom:6px}
+  .qd-card-price{font-size:1.15rem;font-weight:800;color:var(--qd-accent)}
+  .qd-card-each{font-size:.75rem;font-weight:500;color:var(--qd-text-muted)}
+  .qd-card-discount{font-size:.78rem;color:var(--qd-text-muted);margin-top:4px}
+  .qd-card-savings{font-size:.72rem;color:#16a34a;font-weight:600;margin-top:6px}
+
+  /* Table */
+  .qd-table{width:100%;border-collapse:collapse;font-size:.9rem}
+  .qd-table th{text-align:left;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--qd-text-muted);padding:8px 12px;border-bottom:2px solid var(--qd-border)}
+  .qd-table td{padding:10px 12px;border-bottom:1px solid var(--qd-border)}
+  .qd-table tbody tr{transition:background-color .15s;cursor:pointer}
+  .qd-table tbody tr:hover{background:var(--qd-bg-soft)}
+  .qd-table .qd-row--best td{font-weight:600}
+  .qd-table .qd-row--active{background:var(--qd-accent-light)}
+  .qd-table .qd-row--active td{color:var(--qd-accent);font-weight:700}
+
+  /* Pills */
+  .qd-pills{display:flex;flex-wrap:wrap;gap:8px}
+  .qd-pill{display:flex;flex-direction:column;align-items:center;background:var(--qd-bg);border:2px solid var(--qd-border);border-radius:30px;padding:10px 20px;cursor:pointer;transition:all .2s;font-family:inherit;min-width:90px}
+  .qd-pill:hover{border-color:var(--qd-accent);background:var(--qd-accent-light)}
+  .qd-pill--active{border-color:var(--qd-accent);background:var(--qd-accent);color:#fff}
+  .qd-pill--active .qd-pill-qty,.qd-pill--active .qd-pill-price,.qd-pill--active .qd-pill-discount{color:#fff}
+  .qd-pill--best{border-color:var(--qd-accent)}
+  .qd-pill-qty{font-size:.85rem;font-weight:700;color:var(--qd-text)}
+  .qd-pill-price{font-size:.95rem;font-weight:800;color:var(--qd-accent)}
+  .qd-pill-discount{font-size:.68rem;color:var(--qd-text-muted)}
+
+  /* Summary */
+  .qd-live-summary{min-height:0;overflow:hidden;transition:all .25s ease}
+  .qd-live-summary:empty{margin:0;padding:0}
+  .qd-live-summary--nudge,.qd-live-summary--active{margin-top:12px;padding:10px 14px;border-radius:var(--qd-radius-sm);font-size:.88rem}
+  .qd-live-summary--nudge{background:#fef3c7;border:1px solid #fbbf24;color:#92400e}
+  .qd-live-summary--active{background:#ecfdf5;border:1px solid #6ee7b7;color:#065f46}
+  .qd-summary-active{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .qd-summary-price{font-weight:700;font-size:1rem}
+  .qd-summary-total-savings{font-weight:600;font-size:.88rem;color:#16a34a}
+  .qd-summary-nudge strong{color:#78350f}
+
+  /* Responsive */
+  @media(max-width:480px){
+    .qd-cards{grid-template-columns:repeat(2,1fr)}
+    .qd-card{padding:12px 10px 10px}
+    .qd-card-price{font-size:1rem}
+    .qd-pills{justify-content:center}
+    .qd-summary-active{flex-direction:column;align-items:flex-start;gap:4px}
+  }
+</style>
+
+{%- comment -%} ============ HTML + DATA ============ {%- endcomment -%}
+<div
+  class="qd-wrapper"
+  id="qd-section-{{ section.id }}"
+  data-section-id="{{ section.id }}"
+  data-product-id="{{ product.id }}"
+  data-product-price="{{ product.selected_or_first_available_variant.price }}"
+  data-product-compare-price="{{ product.selected_or_first_available_variant.compare_at_price }}"
+  data-money-format="{{ shop.money_format | escape }}"
+>
+  <script type="application/json" id="qd-config-{{ section.id }}">
+    {
+      "enabled": true,
+      "title": {{ section.settings.title | json }},
+      "subtitle": {{ section.settings.subtitle | json }},
+      "discount_type": {{ section.settings.discount_type | json }},
+      "show_savings": {{ section.settings.show_savings | json }},
+      "show_per_unit": {{ section.settings.show_per_unit | json }},
+      "highlight_best": {{ section.settings.highlight_best | json }},
+      "apply_to_cart": {{ section.settings.apply_to_cart | json }},
+      "badge_text": {{ section.settings.badge_text | json }},
+      "table_style": {{ section.settings.table_style | json }},
+      "accent_color": {{ section.settings.accent_color | json }},
+      "tiers": [
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'tier' -%}
+            {
+              "min_qty": {{ block.settings.min_qty | json }},
+              "max_qty": {{ block.settings.max_qty | default: 0 | json }},
+              "discount_value": {{ block.settings.discount_value | json }},
+              "label": {{ block.settings.label | json }},
+              "badge": {{ block.settings.badge | json }}
+            }{%- unless forloop.last -%},{%- endunless -%}
+          {%- endif -%}
+        {%- endfor -%}
+      ]
+    }
+  </script>
+
+  {%- comment -%} The JS will render tier UI into this container {%- endcomment -%}
+  <div id="qd-render-{{ section.id }}"></div>
+</div>
+
+{%- comment -%} ============ INLINE JS ============ {%- endcomment -%}
+<script>
+(function(){
+  'use strict';
+
+  /* ---------- helpers ---------- */
+
+  function fmtMoney(cents, fmt) {
+    if (typeof cents === 'string') cents = cents.replace('.','');
+    var f = fmt || '${ {amount}}';
+    var re = /\{\{\s*(\w+)\s*\}\}/;
+    function commas(n){ return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+    var m = f.match(re);
+    if (!m) return '$' + (cents/100).toFixed(2);
+    var v;
+    switch(m[1]){
+      case 'amount': v=commas((cents/100).toFixed(2)); break;
+      case 'amount_no_decimals': v=commas(Math.round(cents/100)); break;
+      case 'amount_with_comma_separator': v=(cents/100).toFixed(2).replace(/\./,','); break;
+      case 'amount_no_decimals_with_comma_separator': v=commas(Math.round(cents/100)).replace(/,/g,'.'); break;
+      default: v=commas((cents/100).toFixed(2));
+    }
+    return f.replace(re,v);
+  }
+
+  function esc(s){ var d=document.createElement('div'); d.appendChild(document.createTextNode(s)); return d.innerHTML; }
+
+  /* ---------- QD class ---------- */
+
+  function QD(wrapper){
+    this.w = wrapper;
+    this.sid = wrapper.dataset.sectionId;
+    this.basePrice = parseInt(wrapper.dataset.productPrice,10)||0;
+    this.comparePrice = parseInt(wrapper.dataset.productComparePrice,10)||0;
+    this.moneyFmt = wrapper.dataset.moneyFormat || '${{amount}}';
+    var cfgEl = document.getElementById('qd-config-'+this.sid);
+    if(!cfgEl) return;
+    try{ this.cfg = JSON.parse(cfgEl.textContent); } catch(e){ return; }
+    if(!this.cfg.enabled || !this.cfg.tiers || !this.cfg.tiers.length) return;
+    this.cfg.tiers.sort(function(a,b){ return a.min_qty - b.min_qty; });
+    this.target = document.getElementById('qd-render-'+this.sid);
+    this.init();
+  }
+
+  QD.prototype.init = function(){
+    this.render();
+    this.bind();
+  };
+
+  /* --- price math --- */
+  QD.prototype.discPrice = function(t){
+    var b=this.basePrice;
+    if(t.discount_value === 0) return b;
+    switch(this.cfg.discount_type){
+      case 'percentage': return Math.round(b*(1 - t.discount_value/100));
+      case 'fixed_amount': return Math.max(0, b - t.discount_value*100);
+      case 'fixed_price': return t.discount_value*100;
+      default: return b;
+    }
+  };
+  QD.prototype.savings = function(t){ return this.basePrice - this.discPrice(t); };
+  QD.prototype.discLabel = function(t){
+    switch(this.cfg.discount_type){
+      case 'percentage': return t.discount_value+'% off';
+      case 'fixed_amount': return fmtMoney(t.discount_value*100,this.moneyFmt)+' off each';
+      case 'fixed_price': return fmtMoney(t.discount_value*100,this.moneyFmt)+' each';
+      default: return '';
+    }
+  };
+  QD.prototype.tierForQty = function(qty){
+    var matched=null;
+    for(var i=0;i<this.cfg.tiers.length;i++){
+      var t=this.cfg.tiers[i], mx=t.max_qty||Infinity;
+      if(qty>=t.min_qty && qty<=mx) matched=t;
+    }
+    return matched;
+  };
+  QD.prototype.bestTier = function(){
+    var best=null, bs=0;
+    for(var i=0;i<this.cfg.tiers.length;i++){
+      var s=this.savings(this.cfg.tiers[i]);
+      if(s>bs){ bs=s; best=this.cfg.tiers[i]; }
+    }
+    return best;
+  };
+  QD.prototype.tierLabel = function(t){
+    if(t.label) return t.label;
+    return (t.max_qty && t.max_qty>0) ? t.min_qty+' – '+t.max_qty : t.min_qty+'+';
+  };
+
+  /* --- render --- */
+  QD.prototype.render = function(){
+    if(!this.target) return;
+    var c = this.cfg, html='', bt = c.highlight_best ? this.bestTier() : null;
+
+    html += '<div class="qd-container">';
+
+    // header
+    if(c.title || c.subtitle){
+      html += '<div class="qd-header">';
+      if(c.title) html += '<h3 class="qd-title">'+esc(c.title)+'</h3>';
+      if(c.subtitle) html += '<p class="qd-subtitle">'+esc(c.subtitle)+'</p>';
+      html += '</div>';
+    }
+
+    // tiers
+    switch(c.table_style){
+      case 'table': html += this.rTable(bt); break;
+      case 'pills': html += this.rPills(bt); break;
+      default:      html += this.rCards(bt); break;
+    }
+
+    // live summary
+    html += '<div class="qd-live-summary" id="qd-summary-'+this.sid+'"></div>';
+    html += '</div>';
+
+    this.target.innerHTML = html;
+  };
+
+  QD.prototype.rCards = function(bt){
+    var h='<div class="qd-cards">';
+    for(var i=0;i<this.cfg.tiers.length;i++){
+      var t=this.cfg.tiers[i], dp=this.discPrice(t),
+          ib=bt&&t.min_qty===bt.min_qty,
+          badge=t.badge||(ib?(this.cfg.badge_text||'SAVE'):''),
+          sv=this.savings(t);
+      h+='<div class="qd-card'+(ib?' qd-card--best':'')+'" data-tier-idx="'+i+'">';
+      if(badge) h+='<span class="qd-card-badge">'+esc(badge)+'</span>';
+      h+='<div class="qd-card-qty">'+esc(this.tierLabel(t))+'</div>';
+      h+='<div class="qd-card-price">'+fmtMoney(dp,this.moneyFmt)+'<span class="qd-card-each"> each</span></div>';
+      h+='<div class="qd-card-discount">'+this.discLabel(t)+'</div>';
+      if(this.cfg.show_savings&&sv>0) h+='<div class="qd-card-savings">Save '+fmtMoney(sv,this.moneyFmt)+' per item</div>';
+      h+='</div>';
+    }
+    return h+'</div>';
+  };
+
+  QD.prototype.rTable = function(bt){
+    var h='<table class="qd-table"><thead><tr><th>Quantity</th><th>Price Each</th><th>Discount</th>';
+    if(this.cfg.show_savings) h+='<th>You Save</th>';
+    h+='</tr></thead><tbody>';
+    for(var i=0;i<this.cfg.tiers.length;i++){
+      var t=this.cfg.tiers[i], dp=this.discPrice(t), ib=bt&&t.min_qty===bt.min_qty, sv=this.savings(t);
+      h+='<tr class="'+(ib?'qd-row--best':'')+'" data-tier-idx="'+i+'">';
+      h+='<td>'+this.tierLabel(t)+'</td><td>'+fmtMoney(dp,this.moneyFmt)+'</td><td>'+this.discLabel(t)+'</td>';
+      if(this.cfg.show_savings) h+='<td>'+(sv>0?fmtMoney(sv,this.moneyFmt):'-')+'</td>';
+      h+='</tr>';
+    }
+    return h+'</tbody></table>';
+  };
+
+  QD.prototype.rPills = function(bt){
+    var h='<div class="qd-pills">';
+    for(var i=0;i<this.cfg.tiers.length;i++){
+      var t=this.cfg.tiers[i], dp=this.discPrice(t), ib=bt&&t.min_qty===bt.min_qty;
+      h+='<button type="button" class="qd-pill'+(ib?' qd-pill--best':'')+'" data-tier-idx="'+i+'" data-qty="'+t.min_qty+'">';
+      h+='<span class="qd-pill-qty">'+t.min_qty+'+</span>';
+      h+='<span class="qd-pill-price">'+fmtMoney(dp,this.moneyFmt)+'</span>';
+      h+='<span class="qd-pill-discount">'+this.discLabel(t)+'</span>';
+      h+='</button>';
+    }
+    return h+'</div>';
+  };
+
+  /* --- events --- */
+  QD.prototype.bind = function(){
+    var self=this;
+
+    // find qty input on the page
+    this.qtyInput = document.querySelector(
+      'form[action*="/cart/add"] [name="quantity"], #Quantity, .quantity__input, input[name="quantity"]'
+    );
+
+    if(this.qtyInput){
+      this.qtyInput.addEventListener('change', function(){ self.update(); });
+      this.qtyInput.addEventListener('input', function(){ self.update(); });
+    }
+
+    // clicking a card / pill / table row sets qty
+    this.target.addEventListener('click', function(e){
+      var el = e.target.closest('[data-tier-idx]');
+      if(!el) return;
+      var idx = parseInt(el.dataset.tierIdx,10);
+      var tier = self.cfg.tiers[idx];
+      if(self.qtyInput && tier){
+        self.qtyInput.value = tier.min_qty;
+        self.qtyInput.dispatchEvent(new Event('change',{bubbles:true}));
+      }
+      self.update();
+    });
+
+    // variant changes
+    document.addEventListener('variant:changed', function(e){
+      if(e.detail && e.detail.variant){
+        self.basePrice = e.detail.variant.price;
+        self.comparePrice = e.detail.variant.compare_at_price || 0;
+        self.render(); self.update();
+      }
+    });
+
+    // cart form interception
+    if(this.cfg.apply_to_cart) this.interceptForm();
+
+    // initial
+    this.update();
+  };
+
+  QD.prototype.update = function(){
+    var qty = this.qtyInput ? parseInt(this.qtyInput.value,10)||1 : 1;
+    var tier = this.tierForQty(qty);
+    this.highlightTier(tier);
+
+    var el = document.getElementById('qd-summary-'+this.sid);
+    if(!el) return;
+
+    if(!tier){
+      if(qty < this.cfg.tiers[0].min_qty){
+        var next=this.cfg.tiers[0], need=next.min_qty-qty;
+        el.innerHTML='<div class="qd-summary-nudge">Add <strong>'+need+' more</strong> to unlock <strong>'+this.discLabel(next)+'</strong></div>';
+        el.className='qd-live-summary qd-live-summary--nudge';
+      } else {
+        el.innerHTML=''; el.className='qd-live-summary';
+      }
+      this.updatePagePrice(this.basePrice);
+      return;
+    }
+
+    var dp=this.discPrice(tier), ts=(this.basePrice-dp)*qty;
+    var h='<div class="qd-summary-active"><span class="qd-summary-price">'+fmtMoney(dp,this.moneyFmt)+' each</span>';
+    if(this.cfg.show_savings && ts>0) h+='<span class="qd-summary-total-savings">You save '+fmtMoney(ts,this.moneyFmt)+' total</span>';
+    h+='</div>';
+    el.innerHTML=h; el.className='qd-live-summary qd-live-summary--active';
+    this.updatePagePrice(dp);
+  };
+
+  QD.prototype.highlightTier = function(active){
+    if(!this.target) return;
+    var all = this.target.querySelectorAll('[data-tier-idx]');
+    for(var i=0;i<all.length;i++){
+      var idx=parseInt(all[i].dataset.tierIdx,10), t=this.cfg.tiers[idx];
+      var isActive = active && t.min_qty===active.min_qty;
+      all[i].classList.toggle('qd-card--active', isActive);
+      all[i].classList.toggle('qd-row--active', isActive);
+      all[i].classList.toggle('qd-pill--active', isActive);
+    }
+  };
+
+  QD.prototype.updatePagePrice = function(cents){
+    var sels=[
+      '.product__price .price-item--regular','.product-price .money',
+      '.product-single__price','.price--regular .price-item',
+      '.price .money','[data-product-price]'
+    ];
+    for(var i=0;i<sels.length;i++){
+      var el=document.querySelector(sels[i]);
+      if(el){ el.textContent=fmtMoney(cents,this.moneyFmt); break; }
+    }
+  };
+
+  QD.prototype.interceptForm = function(){
+    var self=this, form=document.querySelector('form[action*="/cart/add"]');
+    if(!form) return;
+    form.addEventListener('submit',function(){
+      var qty=self.qtyInput?parseInt(self.qtyInput.value,10)||1:1;
+      var tier=self.tierForQty(qty);
+      if(!tier) return;
+      // remove old
+      var old=form.querySelectorAll('input[name^="properties[_qty_discount"]');
+      for(var i=0;i<old.length;i++) old[i].remove();
+      // inject new
+      var dp=self.discPrice(tier);
+      [{n:'properties[_qty_discount]',v:self.discLabel(tier)},
+       {n:'properties[_qty_discount_price]',v:(dp/100).toFixed(2)},
+       {n:'properties[_qty_discount_type]',v:self.cfg.discount_type},
+       {n:'properties[_qty_discount_value]',v:tier.discount_value}
+      ].forEach(function(p){
+        var inp=document.createElement('input');
+        inp.type='hidden'; inp.name=p.n; inp.value=p.v;
+        form.appendChild(inp);
+      });
+    });
+  };
+
+  /* ---------- init ---------- */
+
+  function boot(){
+    document.querySelectorAll('.qd-wrapper').forEach(function(w){
+      if(!w._qd){ w._qd = new QD(w); }
+    });
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot);
+  else boot();
+
+  // Shopify theme editor live-reload
+  document.addEventListener('shopify:section:load',function(e){
+    var w = e.target.querySelector('.qd-wrapper');
+    if(w){ w._qd = null; new QD(w); }
+  });
+
+})();
+</script>
+
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Quantity Discounts",
+  "tag": "section",
+  "class": "qty-discount-section",
+  "limit": 1,
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Enable quantity discounts",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section title",
+      "default": "Buy More, Save More"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Section subtitle",
+      "default": "Get a better deal when you order in bulk"
+    },
+    {
+      "type": "select",
+      "id": "discount_type",
+      "label": "Discount type",
+      "options": [
+        { "value": "percentage", "label": "Percentage off" },
+        { "value": "fixed_amount", "label": "Fixed amount off per item" },
+        { "value": "fixed_price", "label": "Fixed price per item" }
+      ],
+      "default": "percentage"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_savings",
+      "label": "Show savings amounts",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_per_unit",
+      "label": "Show per-unit price",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "highlight_best",
+      "label": "Highlight best value tier",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "apply_to_cart",
+      "label": "Attach discount info to cart line items",
+      "default": true,
+      "info": "Adds discount metadata as line item properties. Pair with Shopify automatic discounts or Scripts for checkout pricing."
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Default badge text",
+      "default": "SAVE",
+      "info": "Badge shown on the best-value tier"
+    },
+    {
+      "type": "select",
+      "id": "table_style",
+      "label": "Display style",
+      "options": [
+        { "value": "cards", "label": "Cards" },
+        { "value": "table", "label": "Table" },
+        { "value": "pills", "label": "Quick-select pills" }
+      ],
+      "default": "cards"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color",
+      "default": "#4a6cf7"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tier",
+      "name": "Discount Tier",
+      "settings": [
+        {
+          "type": "number",
+          "id": "min_qty",
+          "label": "Minimum quantity",
+          "default": 2
+        },
+        {
+          "type": "number",
+          "id": "max_qty",
+          "label": "Maximum quantity (0 = no limit)",
+          "default": 0
+        },
+        {
+          "type": "number",
+          "id": "discount_value",
+          "label": "Discount value",
+          "default": 10,
+          "info": "Meaning depends on Discount Type above: percentage, dollar amount off, or fixed price."
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Custom tier label (optional)",
+          "default": "",
+          "info": "e.g. 'Starter Pack', 'Best Value'. Leave blank for auto label like '5 – 9'."
+        },
+        {
+          "type": "text",
+          "id": "badge",
+          "label": "Tier badge (optional)",
+          "default": "",
+          "info": "e.g. 'POPULAR', 'BEST DEAL'. Leave blank for default."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Quantity Discounts",
+      "settings": {
+        "enabled": true,
+        "title": "Buy More, Save More",
+        "subtitle": "Get a better deal when you order in bulk",
+        "discount_type": "percentage",
+        "show_savings": true,
+        "show_per_unit": true,
+        "highlight_best": true,
+        "apply_to_cart": true,
+        "badge_text": "SAVE",
+        "table_style": "cards",
+        "accent_color": "#4a6cf7"
+      },
+      "blocks": [
+        {
+          "type": "tier",
+          "settings": { "min_qty": 2, "max_qty": 4, "discount_value": 5, "label": "", "badge": "" }
+        },
+        {
+          "type": "tier",
+          "settings": { "min_qty": 5, "max_qty": 9, "discount_value": 10, "label": "", "badge": "" }
+        },
+        {
+          "type": "tier",
+          "settings": { "min_qty": 10, "max_qty": 24, "discount_value": 15, "label": "", "badge": "POPULAR" }
+        },
+        {
+          "type": "tier",
+          "settings": { "min_qty": 25, "max_qty": 0, "discount_value": 20, "label": "Best Value", "badge": "BEST DEAL" }
+        }
+      ]
+    }
+  ],
+  "templates": ["product"]
+}
+{% endschema %}
