@@ -1,0 +1,322 @@
+/* ================================================================
+   Shopify Quantity Discount Plugin — Styles
+   ================================================================ */
+
+.qd-container {
+  --qd-accent: #4a6cf7;
+  --qd-accent-light: color-mix(in srgb, var(--qd-accent) 12%, transparent);
+  --qd-accent-medium: color-mix(in srgb, var(--qd-accent) 25%, transparent);
+  --qd-text: #1a1a2e;
+  --qd-text-muted: #6b7280;
+  --qd-bg: #ffffff;
+  --qd-bg-soft: #f8f9fc;
+  --qd-border: #e5e7eb;
+  --qd-radius: 10px;
+  --qd-radius-sm: 6px;
+  --qd-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --qd-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.12);
+
+  font-family: inherit;
+  margin: 16px 0;
+  color: var(--qd-text);
+}
+
+/* ---- Header ---- */
+
+.qd-header {
+  margin-bottom: 14px;
+}
+
+.qd-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: var(--qd-text);
+}
+
+.qd-subtitle {
+  font-size: 0.85rem;
+  color: var(--qd-text-muted);
+  margin: 0;
+}
+
+/* ================================================================
+   Cards Layout
+   ================================================================ */
+
+.qd-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.qd-card {
+  position: relative;
+  background: var(--qd-bg);
+  border: 2px solid var(--qd-border);
+  border-radius: var(--qd-radius);
+  padding: 16px 14px 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+
+.qd-card:hover {
+  border-color: var(--qd-accent);
+  box-shadow: var(--qd-shadow);
+  transform: translateY(-1px);
+}
+
+.qd-card--active {
+  border-color: var(--qd-accent);
+  background: var(--qd-accent-light);
+  box-shadow: var(--qd-shadow-lg);
+}
+
+.qd-card--best {
+  border-color: var(--qd-accent);
+}
+
+.qd-card-badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--qd-accent);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.qd-card-qty {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--qd-text);
+  margin-bottom: 6px;
+}
+
+.qd-card-price {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--qd-accent);
+}
+
+.qd-card-each {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--qd-text-muted);
+}
+
+.qd-card-discount {
+  font-size: 0.78rem;
+  color: var(--qd-text-muted);
+  margin-top: 4px;
+}
+
+.qd-card-savings {
+  font-size: 0.72rem;
+  color: #16a34a;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+/* ================================================================
+   Table Layout
+   ================================================================ */
+
+.qd-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.qd-table th {
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--qd-text-muted);
+  padding: 8px 12px;
+  border-bottom: 2px solid var(--qd-border);
+}
+
+.qd-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--qd-border);
+}
+
+.qd-table tbody tr {
+  transition: background-color 0.15s;
+  cursor: pointer;
+}
+
+.qd-table tbody tr:hover {
+  background: var(--qd-bg-soft);
+}
+
+.qd-table .qd-row--best td {
+  font-weight: 600;
+}
+
+.qd-table .qd-row--active {
+  background: var(--qd-accent-light);
+}
+
+.qd-table .qd-row--active td {
+  color: var(--qd-accent);
+  font-weight: 700;
+}
+
+/* ================================================================
+   Pills Layout
+   ================================================================ */
+
+.qd-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.qd-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--qd-bg);
+  border: 2px solid var(--qd-border);
+  border-radius: 30px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  min-width: 90px;
+}
+
+.qd-pill:hover {
+  border-color: var(--qd-accent);
+  background: var(--qd-accent-light);
+}
+
+.qd-pill--active {
+  border-color: var(--qd-accent);
+  background: var(--qd-accent);
+  color: #fff;
+}
+
+.qd-pill--active .qd-pill-qty,
+.qd-pill--active .qd-pill-price,
+.qd-pill--active .qd-pill-discount {
+  color: #fff;
+}
+
+.qd-pill--best {
+  border-color: var(--qd-accent);
+}
+
+.qd-pill-qty {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--qd-text);
+}
+
+.qd-pill-price {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--qd-accent);
+}
+
+.qd-pill-discount {
+  font-size: 0.68rem;
+  color: var(--qd-text-muted);
+}
+
+/* ================================================================
+   Live Summary (below tiers)
+   ================================================================ */
+
+.qd-live-summary {
+  min-height: 0;
+  overflow: hidden;
+  transition: all 0.25s ease;
+}
+
+.qd-live-summary:empty {
+  margin: 0;
+  padding: 0;
+}
+
+.qd-live-summary--nudge,
+.qd-live-summary--active {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: var(--qd-radius-sm);
+  font-size: 0.88rem;
+}
+
+.qd-live-summary--nudge {
+  background: #fef3c7;
+  border: 1px solid #fbbf24;
+  color: #92400e;
+}
+
+.qd-live-summary--active {
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  color: #065f46;
+}
+
+.qd-summary-active {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.qd-summary-price {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.qd-summary-total-savings {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: #16a34a;
+}
+
+.qd-summary-nudge strong {
+  color: #78350f;
+}
+
+/* ================================================================
+   Responsive
+   ================================================================ */
+
+@media (max-width: 480px) {
+  .qd-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .qd-card {
+    padding: 12px 10px 10px;
+  }
+
+  .qd-card-price {
+    font-size: 1rem;
+  }
+
+  .qd-pills {
+    justify-content: center;
+  }
+
+  .qd-summary-active {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
