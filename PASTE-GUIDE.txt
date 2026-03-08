@@ -1,0 +1,302 @@
+================================================================
+INSTALLATION GUIDE — 3 files to edit in Shopify Edit Code
+================================================================
+
+================================================================
+FILE 1: Create new snippet
+================================================================
+Go to: Snippets → Add a new snippet → name it "quantity-discounts"
+Paste the entire contents of: snippets/quantity-discounts.liquid
+
+
+================================================================
+FILE 2: Edit snippets/product-template.liquid
+================================================================
+Find this line:
+    {%- when 'sku' -%}
+
+Right ABOVE that line, paste this:
+
+              {%- when 'quantity_discounts' -%}
+                {% render 'quantity-discounts', block: block, product: product %}
+
+
+================================================================
+FILE 3: Edit sections/main-product.liquid
+================================================================
+In the {% schema %} at the bottom, find:
+
+    "blocks": [
+      {
+        "type": "@app"
+      },
+
+Right AFTER the @app block (after its closing },), paste this:
+
+      {
+        "type": "quantity_discounts",
+        "name": "Quantity Discounts",
+        "limit": 1,
+        "settings": [
+          {
+            "type": "checkbox",
+            "id": "enabled",
+            "label": "Enable quantity discounts",
+            "default": true
+          },
+          {
+            "type": "text",
+            "id": "title",
+            "label": "Section title",
+            "default": "Buy More, Save More"
+          },
+          {
+            "type": "text",
+            "id": "subtitle",
+            "label": "Section subtitle",
+            "default": "Get a better deal when you order in bulk"
+          },
+          {
+            "type": "select",
+            "id": "discount_type",
+            "label": "Discount type",
+            "options": [
+              { "value": "percentage", "label": "Percentage off" },
+              { "value": "fixed_amount", "label": "Fixed amount off per item" },
+              { "value": "fixed_price", "label": "Fixed price per item" }
+            ],
+            "default": "percentage"
+          },
+          {
+            "type": "checkbox",
+            "id": "show_savings",
+            "label": "Show savings amounts",
+            "default": true
+          },
+          {
+            "type": "checkbox",
+            "id": "show_per_unit",
+            "label": "Show per-unit price",
+            "default": true
+          },
+          {
+            "type": "checkbox",
+            "id": "highlight_best",
+            "label": "Highlight best value tier",
+            "default": true
+          },
+          {
+            "type": "checkbox",
+            "id": "apply_to_cart",
+            "label": "Attach discount info to cart line items",
+            "default": true,
+            "info": "Adds discount metadata as line item properties."
+          },
+          {
+            "type": "text",
+            "id": "badge_text",
+            "label": "Default badge text",
+            "default": "SAVE",
+            "info": "Badge shown on the best-value tier"
+          },
+          {
+            "type": "select",
+            "id": "table_style",
+            "label": "Display style",
+            "options": [
+              { "value": "cards", "label": "Cards" },
+              { "value": "table", "label": "Table" },
+              { "value": "pills", "label": "Quick-select pills" }
+            ],
+            "default": "cards"
+          },
+          {
+            "type": "color",
+            "id": "accent_color",
+            "label": "Accent color",
+            "default": "#4a6cf7"
+          },
+          {
+            "type": "header",
+            "content": "Tier 1"
+          },
+          {
+            "type": "number",
+            "id": "tier_1_min_qty",
+            "label": "Min quantity",
+            "default": 2
+          },
+          {
+            "type": "number",
+            "id": "tier_1_max_qty",
+            "label": "Max quantity (0 = no limit)",
+            "default": 4
+          },
+          {
+            "type": "number",
+            "id": "tier_1_discount",
+            "label": "Discount value",
+            "default": 5
+          },
+          {
+            "type": "text",
+            "id": "tier_1_label",
+            "label": "Custom label (optional)"
+          },
+          {
+            "type": "text",
+            "id": "tier_1_badge",
+            "label": "Badge (optional)"
+          },
+          {
+            "type": "header",
+            "content": "Tier 2"
+          },
+          {
+            "type": "number",
+            "id": "tier_2_min_qty",
+            "label": "Min quantity",
+            "default": 5
+          },
+          {
+            "type": "number",
+            "id": "tier_2_max_qty",
+            "label": "Max quantity (0 = no limit)",
+            "default": 9
+          },
+          {
+            "type": "number",
+            "id": "tier_2_discount",
+            "label": "Discount value",
+            "default": 10
+          },
+          {
+            "type": "text",
+            "id": "tier_2_label",
+            "label": "Custom label (optional)"
+          },
+          {
+            "type": "text",
+            "id": "tier_2_badge",
+            "label": "Badge (optional)"
+          },
+          {
+            "type": "header",
+            "content": "Tier 3"
+          },
+          {
+            "type": "number",
+            "id": "tier_3_min_qty",
+            "label": "Min quantity",
+            "default": 10
+          },
+          {
+            "type": "number",
+            "id": "tier_3_max_qty",
+            "label": "Max quantity (0 = no limit)",
+            "default": 24
+          },
+          {
+            "type": "number",
+            "id": "tier_3_discount",
+            "label": "Discount value",
+            "default": 15
+          },
+          {
+            "type": "text",
+            "id": "tier_3_label",
+            "label": "Custom label (optional)"
+          },
+          {
+            "type": "text",
+            "id": "tier_3_badge",
+            "label": "Badge (optional)",
+            "default": "POPULAR"
+          },
+          {
+            "type": "header",
+            "content": "Tier 4"
+          },
+          {
+            "type": "number",
+            "id": "tier_4_min_qty",
+            "label": "Min quantity",
+            "default": 25
+          },
+          {
+            "type": "number",
+            "id": "tier_4_max_qty",
+            "label": "Max quantity (0 = no limit)",
+            "default": 0
+          },
+          {
+            "type": "number",
+            "id": "tier_4_discount",
+            "label": "Discount value",
+            "default": 20
+          },
+          {
+            "type": "text",
+            "id": "tier_4_label",
+            "label": "Custom label (optional)",
+            "default": "Best Value"
+          },
+          {
+            "type": "text",
+            "id": "tier_4_badge",
+            "label": "Badge (optional)",
+            "default": "BEST DEAL"
+          },
+          {
+            "type": "header",
+            "content": "Tier 5 (optional)"
+          },
+          {
+            "type": "number",
+            "id": "tier_5_min_qty",
+            "label": "Min quantity (0 = disabled)",
+            "default": 0
+          },
+          {
+            "type": "number",
+            "id": "tier_5_max_qty",
+            "label": "Max quantity (0 = no limit)",
+            "default": 0
+          },
+          {
+            "type": "number",
+            "id": "tier_5_discount",
+            "label": "Discount value",
+            "default": 0
+          },
+          {
+            "type": "text",
+            "id": "tier_5_label",
+            "label": "Custom label (optional)"
+          },
+          {
+            "type": "text",
+            "id": "tier_5_badge",
+            "label": "Badge (optional)"
+          },
+          {
+            "type": "header",
+            "content": "Layout"
+          },
+          {
+            "id": "margin_top",
+            "type": "range",
+            "label": "Margin top",
+            "unit": "px",
+            "default": 8,
+            "min": 0,
+            "max": 48,
+            "step": 4
+          }
+        ]
+      },
+
+================================================================
+DONE! Now go to Customize → Product page → Product section →
+Add block → "Quantity Discounts" → drag it under Price → Save
+================================================================
